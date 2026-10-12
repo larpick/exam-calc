@@ -26,73 +26,99 @@
     </div>
 
     <!-- Быстрый селектор по номеру билета (скрыт по умолчанию) -->
+    <!-- Быстрый селектор по номеру билета (скрыт по умолчанию) -->
     <div class="ticket-jump-bar" id="ticketJumpBar" style="display: none;">
       <div class="ticket-bar-header">
-        <span class="ticket-bar-title">⚡ БИЛЕТ:</span>
+        <span class="ticket-bar-title">⚡ БЫСТРЫЙ ВЫБОР БИЛЕТА</span>
         <button class="ticket-bar-close" onclick="toggleTicketBar()" type="button" title="Закрыть">✕</button>
       </div>
-      <select id="ticketSelect" onchange="jumpToTicket(this.value)">
-        <option value="">-- Выберите билет для авто-решения --</option>
-        <optgroup label="🎲 Теория вероятностей (Т1–Т6, П1–П10)">
-          <option value="prob_t1">Вопрос 1: Факториал числа (0! = 1)</option>
-          <option value="prob_t2">Вопрос 2: Классическая вероятность P(A)=m/n</option>
-          <option value="prob_t3">Вопрос 3: Правила сложения и умножения</option>
-          <option value="prob_t4">Вопрос 4: Размещения A_n^k (порядок важен)</option>
-          <option value="prob_t5">Вопрос 5: Перестановки P_n = n!</option>
-          <option value="prob_t6">Вопрос 6: Сочетания C_n^k (порядок НЕ важен)</option>
-          <option value="prob_p1">Задача №1: Четырехзначные числа (0, 2, 4, 5)</option>
-          <option value="prob_p2">Задача №2: Выбор 3 человек из 21 бригады</option>
-          <option value="prob_p3">Задача №3: 30 депутатов думской фракции</option>
-          <option value="prob_p4">Задача №4: Двузначные числа из 1, 3, 4</option>
-          <option value="prob_p5">Задача №5: 10 пирожных 4 видов</option>
-          <option value="prob_p6">Задача №6: 3 апельсина из 9 фруктов</option>
-          <option value="prob_p7">Задача №7: Слово ТЕОРИЯ (1/720)</option>
-          <option value="prob_p8">Задача №8: Шары в урне (15 б, 5 к, 10 ч)</option>
-          <option value="prob_p9">Задача №9: 1 туз и 1 король из 36 карт</option>
-          <option value="prob_p10">Задача №10: 2 туза из 36 карт</option>
-        </optgroup>
-        <optgroup label="🔲 Матрицы & СЛАУ (№1–8)">
-          <option value="math_1">Билет №1: Сложение и умножение матриц 3A + B</option>
-          <option value="math_2">Билет №2: Вычитание матриц A - 2B</option>
-          <option value="math_3">Билет №3: Умножение матриц AB</option>
-          <option value="math_4">Билет №4: Транспонирование матрицы A^T</option>
-          <option value="math_5">Билет №5: Определитель 2×2 (det A)</option>
-          <option value="math_6">Билет №6: Определитель 3×3 (det A)</option>
-          <option value="math_7">Билет №7: Метод Крамера 2×2</option>
-          <option value="math_8">Билет №8: Метод Крамера 3×3</option>
-        </optgroup>
-        <optgroup label="📈 Производные (№9–15)">
-          <option value="math_9">Билет №9: Производная многочлена (3x^5 - 2x^4...)</option>
-          <option value="math_10">Билет №10: Производная произведения (uv)'</option>
-          <option value="math_11">Билет №11: Производная дроби (u/v)'</option>
-          <option value="math_12">Билет №12: Сложная функция ((2x + 4)^10)'</option>
-          <option value="math_13">Билет №13: Вторая производная f''(x)</option>
-          <option value="math_14">Билет №14: Дифференциал функции df(x)</option>
-          <option value="math_15">Билет №15: Исследование на возрастание и убывание</option>
-        </optgroup>
-        <optgroup label="📐 Интегралы & Площади (№16–22)">
-          <option value="math_16">Билет №16: Интегрирование степенных функций</option>
-          <option value="math_17">Билет №17: Интеграл от экспоненты ∫ e^(3x) dx</option>
-          <option value="math_18">Билет №18: Линейная подстановка ∫ (2x + 4)^6 dx</option>
-          <option value="math_19">Билет №19: Интеграл от тригонометрии ∫ sin(3x) dx</option>
-          <option value="math_20">Билет №20: Интегрирование по частям ∫ ln(2x + 4) dx</option>
-          <option value="math_21">Билет №21: Ньютон-Лейбниц ∫_1^2 (x^2 - 2x) dx</option>
-          <option value="math_22">Билет №22: Площадь через интеграл (4x^2 + 3)</option>
-        </optgroup>
-        <optgroup label="♾️ Пределы (№23–27)">
-          <option value="math_23">Билет №23: Непосредственная подстановка x -> 1</option>
-          <option value="math_24">Билет №24: Раскрытие неопределенности [0/0] при x -> 5</option>
-          <option value="math_25">Билет №25: Степени равны (4x^5 / -x^5 -> -4)</option>
-          <option value="math_26">Билет №26: Степень числителя больше (-> ∞)</option>
-          <option value="math_27">Билет №27: Степень знаменателя больше (-> 0)</option>
-        </optgroup>
-        <optgroup label="↗️ Векторы & Прямая (№28–31)">
-          <option value="math_28">Билет №28: Смешанное произведение (a, b, c)</option>
-          <option value="math_29">Билет №29: Скалярное произведение a · b</option>
-          <option value="math_30">Билет №30: Векторное произведение [a × b]</option>
-          <option value="math_31">Билет №31: Уравнение прямой через 2 точки A и B</option>
-        </optgroup>
-      </select>
+
+      <!-- Живой поиск -->
+      <div class="ticket-search-box">
+        <input 
+          type="text" 
+          id="ticketSearchInput" 
+          class="ticket-search-input" 
+          placeholder="🔍 Введи номер (2, 8, 21) или слово (шары, крамер)..." 
+          autocomplete="off"
+          oninput="handleTicketSearch(this.value)"
+        >
+        <button type="button" class="ticket-search-clear" id="ticketSearchClear" onclick="clearTicketSearch()" style="display: none;">✕</button>
+      </div>
+
+      <!-- Результаты живого поиска -->
+      <div id="ticketSearchResults" class="ticket-search-results" style="display: none;"></div>
+
+      <!-- Сетка быстрых кнопок с номерами -->
+      <div id="ticketGridContainer" class="ticket-grid-container">
+        <!-- Блок 1: Тервер (Теория Т1–Т6) -->
+        <div class="ticket-grid-section">
+          <div class="ticket-grid-label">🎲 Теория вероятностей (Теория Т1–Т6):</div>
+          <div class="ticket-btn-row">
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t1')">Т1</button>
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t2')">Т2</button>
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t3')">Т3</button>
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t4')">Т4</button>
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t5')">Т5</button>
+            <button type="button" class="t-btn t-btn-theory" onclick="pickTicketQuick('prob_t6')">Т6</button>
+          </div>
+        </div>
+
+        <!-- Блок 2: Тервер (Задачи П1–П10) -->
+        <div class="ticket-grid-section">
+          <div class="ticket-grid-label">🎲 Теория вероятностей (Задачи П1–П10):</div>
+          <div class="ticket-btn-row">
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p1')">П1</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p2')">П2</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p3')">П3</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p4')">П4</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p5')">П5</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p6')">П6</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p7')">П7</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p8')">П8</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p9')">П9</button>
+            <button type="button" class="t-btn t-btn-prob" onclick="pickTicketQuick('prob_p10')">П10</button>
+          </div>
+        </div>
+
+        <!-- Блок 3: Высшая математика (1–31) -->
+        <div class="ticket-grid-section">
+          <div class="ticket-grid-label">📐 Вышмат (Задачи №1–31):</div>
+          <div class="ticket-btn-row">
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_1')">1</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_2')">2</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_3')">3</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_4')">4</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_5')">5</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_6')">6</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_7')">7</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_8')">8</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_9')">9</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_10')">10</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_11')">11</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_12')">12</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_13')">13</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_14')">14</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_15')">15</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_16')">16</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_17')">17</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_18')">18</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_19')">19</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_20')">20</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_21')">21</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_22')">22</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_23')">23</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_24')">24</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_25')">25</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_26')">26</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_27')">27</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_28')">28</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_29')">29</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_30')">30</button>
+            <button type="button" class="t-btn t-btn-math" onclick="pickTicketQuick('math_31')">31</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Верхняя панель режимов (встроена открыто) -->

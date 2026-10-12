@@ -934,10 +934,78 @@ window.toggleTicketBar = function() {
   const isHidden = bar.style.display === 'none' || !bar.style.display;
   bar.style.display = isHidden ? 'flex' : 'none';
   if (isHidden) {
-    const sel = document.getElementById('ticketSelect');
-    if (sel) {
-      sel.focus();
+    const inp = document.getElementById('ticketSearchInput');
+    if (inp) {
+      setTimeout(() => inp.focus(), 50);
     }
+  }
+};
+
+window.pickTicketQuick = function(ticketKey) {
+  if (typeof window.jumpToTicket === 'function') {
+    window.jumpToTicket(ticketKey);
+  }
+  // Мягко скрываем панель выбора после того, как билет выбран
+  const bar = document.getElementById('ticketJumpBar');
+  if (bar) bar.style.display = 'none';
+};
+
+window.handleTicketSearch = function(query) {
+  const q = (query || '').trim().toLowerCase();
+  const resContainer = document.getElementById('ticketSearchResults');
+  const gridContainer = document.getElementById('ticketGridContainer');
+  const clearBtn = document.getElementById('ticketSearchClear');
+
+  if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
+  if (!q) {
+    if (resContainer) {
+      resContainer.style.display = 'none';
+      resContainer.innerHTML = '';
+    }
+    if (gridContainer) gridContainer.style.display = 'flex';
+    return;
+  }
+
+  if (gridContainer) gridContainer.style.display = 'none';
+  if (!resContainer) return;
+
+  const tickets = window.EXAM_TICKETS || {};
+  const matched = [];
+
+  for (const [key, t] of Object.entries(tickets)) {
+    const hay = `${t.number || ''} ${t.title || ''} ${t.problem || ''} ${t.answer || ''} ${key}`.toLowerCase();
+    if (hay.includes(q)) {
+      matched.push({ key, t });
+    }
+  }
+
+  resContainer.style.display = 'flex';
+  if (matched.length === 0) {
+    resContainer.innerHTML = `<div class="no-tickets-found">Ничего не найдено по запросу «${query}». Попробуйте номер (напр. 8 или 21)</div>`;
+  } else {
+    resContainer.innerHTML = matched.map(({ key, t }) => {
+      const cleanTitle = (t.title || '').replace(/\$[^$]+\$/g, '').trim();
+      const cleanProb = (t.problem || '').replace(/\$[^$]+\$/g, '').replace(/<[^>]+>/g, '').trim();
+      return `
+        <div class="search-ticket-item" onclick="pickTicketQuick('${key}')">
+          <div class="search-t-num">${t.number || ''}</div>
+          <div class="search-t-body">
+            <div class="search-t-title">${cleanTitle}</div>
+            <div class="search-t-preview">${cleanProb.slice(0, 80)}...</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+};
+
+window.clearTicketSearch = function() {
+  const inp = document.getElementById('ticketSearchInput');
+  if (inp) {
+    inp.value = '';
+    window.handleTicketSearch('');
+    inp.focus();
   }
 };
 
