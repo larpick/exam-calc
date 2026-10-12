@@ -1,0 +1,593 @@
+:root {
+  --bg-black: #000000;
+  --bg-dark: #1c1c1e;
+  --bg-card: #2c2c2e;
+  --btn-num: #333333;
+  --btn-func: #505052;
+  --btn-op: #ff9f0a;
+  --btn-math: #0a84ff;
+  --btn-accent: #30d158;
+  --text-white: #ffffff;
+  --text-dim: #8e8e93;
+  --text-orange: #ff9f0a;
+  --text-blue: #0a84ff;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  background-color: var(--bg-black);
+  color: var(--text-white);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow-x: hidden;
+}
+
+.calc-app {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  background-color: var(--bg-black);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--safe-top) + 12px) 16px calc(var(--safe-bottom) + 16px);
+  position: relative;
+}
+
+/* Header & Mode Bar */
+.app-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 6px;
+}
+
+.app-title-area {
+  cursor: pointer;
+  user-select: none;
+}
+
+.app-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #71717a;
+  letter-spacing: -0.2px;
+  transition: color 0.2s;
+}
+
+.app-title-area:hover .app-title {
+  color: #a1a1aa;
+}
+
+.secret-star-btn {
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 4px 6px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.secret-star-btn:active {
+  transform: scale(1.25);
+  opacity: 1;
+}
+
+/* Discreet Ticket Jump Bar */
+.ticket-jump-bar {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #1c1c1e;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #ff9f0a;
+  animation: slideDownBar 0.2s ease-out;
+}
+
+@keyframes slideDownBar {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ticket-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-bar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff9f0a;
+}
+
+.ticket-bar-close {
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.ticket-bar-close:hover {
+  color: #ffffff;
+}
+
+#ticketSelect {
+  flex: 1;
+  background: #2c2c2e;
+  color: #fff;
+  border: 1px solid #48484a;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.mode-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 10px;
+  scrollbar-width: none;
+}
+
+.mode-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.mode-pill {
+  background: var(--bg-card);
+  color: var(--text-dim);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-pill.active {
+  background: var(--btn-op);
+  color: #fff;
+}
+
+/* Display */
+.calc-display {
+  padding: 16px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  min-height: 110px;
+}
+
+.display-history {
+  font-size: 18px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  min-height: 24px;
+  word-break: break-all;
+  text-align: right;
+}
+
+.display-main {
+  font-size: 54px;
+  font-weight: 300;
+  line-height: 1.1;
+  word-break: break-all;
+  text-align: right;
+  letter-spacing: -1px;
+}
+
+/* Standard Keypad */
+.keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.calc-btn {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  font-size: 26px;
+  font-weight: 400;
+  color: #fff;
+  background: var(--btn-num);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.calc-btn:active {
+  filter: brightness(1.3);
+  transform: scale(0.96);
+}
+
+.calc-btn.btn-zero {
+  grid-column: span 2;
+  aspect-ratio: auto;
+  border-radius: 9999px;
+  justify-content: flex-start;
+  padding-left: 28px;
+}
+
+.calc-btn.btn-op {
+  background: var(--btn-op);
+  font-size: 30px;
+}
+
+.calc-btn.btn-op.active {
+  background: #fff;
+  color: var(--btn-op);
+}
+
+.calc-btn.btn-func {
+  background: var(--btn-func);
+  color: #fff;
+  font-size: 22px;
+}
+
+.calc-btn.btn-math {
+  background: var(--btn-math);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Higher Math Custom Forms */
+.math-panel {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 0;
+}
+
+.math-panel.active {
+  display: flex;
+}
+
+.math-card {
+  background: var(--bg-dark);
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.math-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-orange);
+  line-height: 1.45;
+  display: block;
+  word-break: break-word;
+}
+
+.math-card-title .katex {
+  font-size: 1.08em;
+  color: var(--text-orange);
+}
+
+.mode-pill .katex {
+  font-size: 1.05em;
+  color: inherit;
+}
+
+.math-inputs-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.math-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.math-input-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.math-input-label .katex {
+  font-size: 1.05em;
+  color: #cbd5e1;
+}
+
+.math-input {
+  background: var(--bg-card);
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 16px;
+  color: #fff;
+  outline: none;
+  width: 100%;
+}
+
+.math-input:focus {
+  border-color: var(--text-orange);
+}
+
+.matrix-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.matrix-grid-3x3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.math-calc-btn {
+  background: var(--btn-op);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  line-height: 1.35;
+  word-break: break-word;
+  transition: all 0.2s;
+}
+
+.math-calc-btn .katex {
+  font-size: 1.06em;
+  color: inherit;
+}
+
+.math-calc-btn:hover {
+  filter: brightness(1.1);
+}
+
+.math-calc-btn:active {
+  transform: scale(0.98);
+}
+
+/* Solution & Pronunciation Drawer */
+.solution-drawer {
+  background: #1c1c1e;
+  border: 1px solid #333;
+  border-radius: 20px;
+  padding: 18px;
+  margin-top: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  animation: slideUpDrawer 0.3s ease;
+}
+
+.solution-drawer.visible {
+  display: flex;
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.drawer-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawer-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.solution-result-badge {
+  background: rgba(48, 209, 88, 0.15);
+  border: 1px solid rgba(48, 209, 88, 0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #30d158;
+}
+
+.solution-steps-box {
+  background: #141416;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.solution-step-item {
+  color: #e5e5ea;
+  border-bottom: 1px solid #222;
+  padding-bottom: 6px;
+}
+
+.solution-step-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.drawer-pronounce-box {
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: #7dd3fc;
+  line-height: 1.45;
+}
+
+.drawer-pronounce-box b {
+  color: #38bdf8;
+}
+
+.drawer-pronounce-box em {
+  color: #fff;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.pronounce-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pronounce-content {
+  flex: 1;
+}
+
+.pronounce-mini-btn {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.pronounce-mini-btn:hover {
+  background: rgba(56, 189, 248, 0.35);
+  transform: scale(1.05);
+}
+
+.drawer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-speak-drawer {
+  background: rgba(14, 165, 233, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-speak-drawer:hover {
+  background: rgba(14, 165, 233, 0.35);
+  color: #fff;
+}
+
+.btn-speak-drawer.speaking {
+  background: rgba(244, 63, 94, 0.3);
+  border-color: #f43f5e;
+  color: #fda4af;
+}
+
+@keyframes slideUpDrawer {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 360px) {
+  .display-main { font-size: 42px; }
+  .calc-btn { font-size: 22px; }
+}
+
+@keyframes pulseHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(255, 159, 10, 0.7); border-color: #ff9f0a; }
+  50% { box-shadow: 0 0 16px 4px rgba(255, 159, 10, 0.9); border-color: #ff9f0a; }
+  100% { box-shadow: 0 0 0 0 rgba(255, 159, 10, 0); }
+}
+
+.card-highlight {
+  animation: pulseHighlight 1.2s ease-in-out 2;
+  border: 2px solid #ff9f0a !important;
+}
+
+/* Drawer Sheet Writeup (Как писать на листке комиссии) */
+.drawer-sheet-box {
+  margin-top: 14px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.drawer-sheet-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drawer-sheet-text {
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #f1f5f9;
+  user-select: text;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}

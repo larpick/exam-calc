@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Калькулятор</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Калькулятор">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+
+  <div class="calc-app">
+    <!-- Верхняя незаметная панель со звездочкой -->
+    <div class="app-topbar">
+      <div class="app-title-area" onclick="toggleTicketBar()" title="Билеты">
+        <span class="app-title">Калькулятор</span>
+      </div>
+      <button class="secret-star-btn" id="starToggleBtn" onclick="toggleTicketBar()" aria-label="Билеты" title="Билеты">⭐</button>
+    </div>
+
+    <!-- Быстрый селектор по номеру билета (скрыт по умолчанию) -->
+    <div class="ticket-jump-bar" id="ticketJumpBar" style="display: none;">
+      <div class="ticket-bar-header">
+        <span class="ticket-bar-title">⚡ БИЛЕТ:</span>
+        <button class="ticket-bar-close" onclick="toggleTicketBar()" type="button" title="Закрыть">✕</button>
+      </div>
+      <select id="ticketSelect" onchange="jumpToTicket(this.value)">
+        <option value="">-- Выберите билет для авто-решения --</option>
+        <optgroup label="🎲 Теория вероятностей (Т1–Т6, П1–П10)">
+          <option value="prob_t1">Вопрос 1: Факториал числа (0! = 1)</option>
+          <option value="prob_t2">Вопрос 2: Классическая вероятность P(A)=m/n</option>
+          <option value="prob_t3">Вопрос 3: Правила сложения и умножения</option>
+          <option value="prob_t4">Вопрос 4: Размещения A_n^k (порядок важен)</option>
+          <option value="prob_t5">Вопрос 5: Перестановки P_n = n!</option>
+          <option value="prob_t6">Вопрос 6: Сочетания C_n^k (порядок НЕ важен)</option>
+          <option value="prob_p1">Задача №1: Четырехзначные числа (0, 2, 4, 5)</option>
+          <option value="prob_p2">Задача №2: Выбор 3 человек из 21 бригады</option>
+          <option value="prob_p3">Задача №3: 30 депутатов думской фракции</option>
+          <option value="prob_p4">Задача №4: Двузначные числа из 1, 3, 4</option>
+          <option value="prob_p5">Задача №5: 10 пирожных 4 видов</option>
+          <option value="prob_p6">Задача №6: 3 апельсина из 9 фруктов</option>
+          <option value="prob_p7">Задача №7: Слово ТЕОРИЯ (1/720)</option>
+          <option value="prob_p8">Задача №8: Шары в урне (15 б, 5 к, 10 ч)</option>
+          <option value="prob_p9">Задача №9: 1 туз и 1 король из 36 карт</option>
+          <option value="prob_p10">Задача №10: 2 туза из 36 карт</option>
+        </optgroup>
+        <optgroup label="🔲 Матрицы & СЛАУ (№1–8)">
+          <option value="math_1">Билет №1: Сложение и умножение матриц 3A + B</option>
+          <option value="math_2">Билет №2: Вычитание матриц A - 2B</option>
+          <option value="math_3">Билет №3: Умножение матриц AB</option>
+          <option value="math_4">Билет №4: Транспонирование матрицы A^T</option>
+          <option value="math_5">Билет №5: Определитель 2×2 (det A)</option>
+          <option value="math_6">Билет №6: Определитель 3×3 (det A)</option>
+          <option value="math_7">Билет №7: Метод Крамера 2×2</option>
+          <option value="math_8">Билет №8: Метод Крамера 3×3</option>
+        </optgroup>
+        <optgroup label="📈 Производные (№9–15)">
+          <option value="math_9">Билет №9: Производная многочлена (3x^5 - 2x^4...)</option>
+          <option value="math_10">Билет №10: Производная произведения (uv)'</option>
+          <option value="math_11">Билет №11: Производная дроби (u/v)'</option>
+          <option value="math_12">Билет №12: Сложная функция ((2x + 4)^10)'</option>
+          <option value="math_13">Билет №13: Вторая производная f''(x)</option>
+          <option value="math_14">Билет №14: Дифференциал функции df(x)</option>
+          <option value="math_15">Билет №15: Исследование на возрастание и убывание</option>
+        </optgroup>
+        <optgroup label="📐 Интегралы & Площади (№16–22)">
+          <option value="math_16">Билет №16: Интегрирование степенных функций</option>
+          <option value="math_17">Билет №17: Интеграл от экспоненты ∫ e^(3x) dx</option>
+          <option value="math_18">Билет №18: Линейная подстановка ∫ (2x + 4)^6 dx</option>
+          <option value="math_19">Билет №19: Интеграл от тригонометрии ∫ sin(3x) dx</option>
+          <option value="math_20">Билет №20: Интегрирование по частям ∫ ln(2x + 4) dx</option>
+          <option value="math_21">Билет №21: Ньютон-Лейбниц ∫_1^2 (x^2 - 2x) dx</option>
+          <option value="math_22">Билет №22: Площадь через интеграл (4x^2 + 3)</option>
+        </optgroup>
+        <optgroup label="♾️ Пределы (№23–27)">
+          <option value="math_23">Билет №23: Непосредственная подстановка x -> 1</option>
+          <option value="math_24">Билет №24: Раскрытие неопределенности [0/0] при x -> 5</option>
+          <option value="math_25">Билет №25: Степени равны (4x^5 / -x^5 -> -4)</option>
+          <option value="math_26">Билет №26: Степень числителя больше (-> ∞)</option>
+          <option value="math_27">Билет №27: Степень знаменателя больше (-> 0)</option>
+        </optgroup>
+        <optgroup label="↗️ Векторы & Прямая (№28–31)">
+          <option value="math_28">Билет №28: Смешанное произведение (a, b, c)</option>
+          <option value="math_29">Билет №29: Скалярное произведение a · b</option>
+          <option value="math_30">Билет №30: Векторное произведение [a × b]</option>
+          <option value="math_31">Билет №31: Уравнение прямой через 2 точки A и B</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Верхняя панель режимов (встроена открыто) -->
+    <div class="mode-bar">
+      <button class="mode-pill active" data-mode="standard">🔢 Стандарт</button>
+      <button class="mode-pill" data-mode="prob">🎲 Тервер (Т1-6, П1-10)</button>
+      <button class="mode-pill" data-mode="matrices">🔲 Матрицы & Крамер (№1–8)</button>
+      <button class="mode-pill" data-mode="derivatives">📈 Производные (№9–15)</button>
+      <button class="mode-pill" data-mode="integrals">📐 Интегралы & Площади (№16–22)</button>
+      <button class="mode-pill" data-mode="limits">♾️ Пределы (№23–27)</button>
+      <button class="mode-pill" data-mode="vectors">↗️ Векторы & Прямая (№28–31)</button>
+    </div>
+
+    <!-- Основной дисплей калькулятора -->
+    <div class="calc-display" id="calcDisplay">
+      <div class="display-history" id="displayHistory"></div>
+      <div class="display-main" id="displayMain">0</div>
+    </div>
+
+    <!-- 1. Панель стандартного калькулятора -->
+    <div class="keypad-grid" id="panelStandard">
+      <button class="calc-btn btn-func" onclick="calcInput('clear')">AC</button>
+      <button class="calc-btn btn-func" onclick="calcInput('paren', '(')">(</button>
+      <button class="calc-btn btn-func" onclick="calcInput('paren', ')')">)</button>
+      <button class="calc-btn btn-op" onclick="calcInput('op', '/')">÷</button>
+
+      <button class="calc-btn" onclick="calcInput('num', '7')">7</button>
+      <button class="calc-btn" onclick="calcInput('num', '8')">8</button>
+      <button class="calc-btn" onclick="calcInput('num', '9')">9</button>
+      <button class="calc-btn btn-op" onclick="calcInput('op', '*')">×</button>
+
+      <button class="calc-btn" onclick="calcInput('num', '4')">4</button>
+      <button class="calc-btn" onclick="calcInput('num', '5')">5</button>
+      <button class="calc-btn" onclick="calcInput('num', '6')">6</button>
+      <button class="calc-btn btn-op" onclick="calcInput('op', '-')">−</button>
+
+      <button class="calc-btn" onclick="calcInput('num', '1')">1</button>
+      <button class="calc-btn" onclick="calcInput('num', '2')">2</button>
+      <button class="calc-btn" onclick="calcInput('num', '3')">3</button>
+      <button class="calc-btn btn-op" onclick="calcInput('op', '+')">+</button>
+
+      <button class="calc-btn" onclick="calcInput('num', '0')">0</button>
+      <button class="calc-btn" onclick="calcInput('dot')">,</button>
+      <button class="calc-btn btn-func" onclick="calcInput('sign')">±</button>
+      <button class="calc-btn btn-op" onclick="calcInput('equals')">=</button>
+    </div>
+
+    <!-- 2. Панель Тервер & Комбинаторика -->
+    <div class="math-panel" id="panelProb">
+      <div class="math-card" id="card-prob-comb">
+        <div class="math-card-title">
+          <span>Сочетания $C_n^k$, Размещения $A_n^k$, Факториал</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Всего ($n$):</span>
+            <input type="number" class="math-input" id="probN" value="21" min="0">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Выбираем ($k$):</span>
+            <input type="number" class="math-input" id="probK" value="3" min="0">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="math-calc-btn" onclick="solveCombinations()">Найти $C_n^k$ (порядок НЕ важен)</button>
+          <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveArrangements()">Найти $A_n^k$ (порядок важен)</button>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button class="math-calc-btn" style="background: #8b5cf6;" onclick="solvePermutations()">Перестановки $P_n = n!$</button>
+          <button class="math-calc-btn" style="background: #ec4899;" onclick="solveRepeatCombinations()">С повторениями $\bar{C}_n^k$</button>
+        </div>
+      </div>
+
+      <div class="math-card" id="card-prob-classic">
+        <div class="math-card-title">
+          <span>Классическая вероятность $P(A) = \frac{m}{n}$</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Благоприятных ($m$):</span>
+            <input type="number" class="math-input" id="probM" value="5" min="0">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Всего исходов ($n$):</span>
+            <input type="number" class="math-input" id="probTotalN" value="9" min="1">
+          </div>
+        </div>
+        <button class="math-calc-btn" style="background: #10b981;" onclick="solveClassicProb()">Рассчитать вероятность $P(A)$</button>
+      </div>
+    </div>
+
+    <!-- 3. Панель Матрицы & Крамер (№1–8) -->
+    <div class="math-panel" id="panelMatrices">
+      <!-- Определитель 2x2 -->
+      <div class="math-card" id="card-matrix-det2">
+        <div class="math-card-title">
+          <span>Определитель матрицы 2×2: $\det A = ad - bc$ (Билет №5)</span>
+        </div>
+        <div class="matrix-grid-2x2">
+          <input type="number" class="math-input" id="m2_11" value="2" placeholder="a11">
+          <input type="number" class="math-input" id="m2_12" value="8" placeholder="a12">
+          <input type="number" class="math-input" id="m2_21" value="-5" placeholder="a21">
+          <input type="number" class="math-input" id="m2_22" value="1" placeholder="a22">
+        </div>
+        <button class="math-calc-btn" onclick="solveDet2x2()">Вычислить $\det A$ (2×2)</button>
+      </div>
+
+      <!-- Определитель 3x3 -->
+      <div class="math-card" id="card-matrix-det3">
+        <div class="math-card-title">
+          <span>Определитель матрицы 3×3 (разложение) (Билет №6)</span>
+        </div>
+        <div class="matrix-grid-3x3">
+          <input type="number" class="math-input" id="m3_11" value="1" placeholder="a11">
+          <input type="number" class="math-input" id="m3_12" value="1" placeholder="a12">
+          <input type="number" class="math-input" id="m3_13" value="1" placeholder="a13">
+          <input type="number" class="math-input" id="m3_21" value="-3" placeholder="a21">
+          <input type="number" class="math-input" id="m3_22" value="1" placeholder="a22">
+          <input type="number" class="math-input" id="m3_23" value="3" placeholder="a23">
+          <input type="number" class="math-input" id="m3_31" value="5" placeholder="a31">
+          <input type="number" class="math-input" id="m3_32" value="1" placeholder="a32">
+          <input type="number" class="math-input" id="m3_33" value="2" placeholder="a33">
+        </div>
+        <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveDet3x3()">Вычислить $\det A$ (3×3)</button>
+      </div>
+
+      <!-- Метод Крамера 2x2 -->
+      <div class="math-card" id="card-matrix-cramer2">
+        <div class="math-card-title">
+          <span>Метод Крамера для системы 2×2 (Билет №7)</span>
+        </div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 4px;">Уравнение 1: $a_1 x + b_1 y = c_1$ | Уравнение 2: $a_2 x + b_2 y = c_2$</div>
+        <div class="matrix-grid-3x3">
+          <input type="number" class="math-input" id="cr_a1" value="2" placeholder="a1">
+          <input type="number" class="math-input" id="cr_b1" value="-3" placeholder="b1">
+          <input type="number" class="math-input" id="cr_c1" value="1" placeholder="c1">
+          <input type="number" class="math-input" id="cr_a2" value="4" placeholder="a2">
+          <input type="number" class="math-input" id="cr_b2" value="2" placeholder="b2">
+          <input type="number" class="math-input" id="cr_c2" value="5" placeholder="c2">
+        </div>
+        <button class="math-calc-btn" style="background: #10b981;" onclick="solveCramer2x2()">Решить систему 2×2 по Крамеру</button>
+      </div>
+
+      <!-- Метод Крамера 3x3 -->
+      <div class="math-card" id="card-matrix-cramer3">
+        <div class="math-card-title">
+          <span>Метод Крамера для системы 3×3 (Билет №8)</span>
+        </div>
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">Строки: $a_i, b_i, c_i$ и свободный член $d_i$:</div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px;">
+          <input type="number" class="math-input" id="cr3_a1" value="1" placeholder="a1">
+          <input type="number" class="math-input" id="cr3_b1" value="1" placeholder="b1">
+          <input type="number" class="math-input" id="cr3_c1" value="-1" placeholder="c1">
+          <input type="number" class="math-input" id="cr3_d1" value="2" placeholder="d1">
+
+          <input type="number" class="math-input" id="cr3_a2" value="2" placeholder="a2">
+          <input type="number" class="math-input" id="cr3_b2" value="-1" placeholder="b2">
+          <input type="number" class="math-input" id="cr3_c2" value="4" placeholder="c2">
+          <input type="number" class="math-input" id="cr3_d2" value="1" placeholder="d2">
+
+          <input type="number" class="math-input" id="cr3_a3" value="-1" placeholder="a3">
+          <input type="number" class="math-input" id="cr3_b3" value="6" placeholder="b3">
+          <input type="number" class="math-input" id="cr3_c3" value="1" placeholder="c3">
+          <input type="number" class="math-input" id="cr3_d3" value="5" placeholder="d3">
+        </div>
+        <button class="math-calc-btn" style="background: #8b5cf6;" onclick="solveCramer3x3()">Решить систему 3×3 по Крамеру</button>
+      </div>
+    </div>
+
+    <!-- 4. Панель Производные (№9–15) -->
+    <div class="math-panel" id="panelDerivatives">
+      <div class="math-card" id="card-deriv-poly">
+        <div class="math-card-title">
+          <span>Производная многочлена: $f(x) = ax^n + bx^m + cx + d$</span>
+        </div>
+        <div class="math-input-group">
+          <span class="math-input-label">Функция (например: 3x^5 - 2x^4 + 4x - 1):</span>
+          <input type="text" class="math-input" id="derivFunc" value="3x^5 - 2x^4 + 4x - 1">
+        </div>
+        <button class="math-calc-btn" onclick="solvePolynomialDeriv()">Найти производную $f'(x)$ и $f''(x)$</button>
+      </div>
+
+      <div class="math-card" id="card-deriv-comp">
+        <div class="math-card-title">
+          <span>Производная сложной функции: $((ax + b)^n)'$</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">a:</span>
+            <input type="number" class="math-input" id="compA" value="2">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">b:</span>
+            <input type="number" class="math-input" id="compB" value="4">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Степень $n$:</span>
+            <input type="number" class="math-input" id="compN" value="10">
+          </div>
+        </div>
+        <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveCompositeDeriv()">Найти $((ax+b)^n)'$</button>
+      </div>
+    </div>
+
+    <!-- 5. Панель Интегралы & Площади (№16–22) -->
+    <div class="math-panel" id="panelIntegrals">
+      <div class="math-card" id="card-int-def">
+        <div class="math-card-title">
+          <span>Определенный интеграл & Площадь: $\int_a^b f(x)\,dx$</span>
+        </div>
+        <div class="math-input-group">
+          <span class="math-input-label">Подынтегральная функция (например: 4x^2 + 3):</span>
+          <input type="text" class="math-input" id="intFunc" value="4x^2 + 3">
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Нижний предел ($a$):</span>
+            <input type="number" class="math-input" id="intA" value="1">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Верхний предел ($b$):</span>
+            <input type="number" class="math-input" id="intB" value="2">
+          </div>
+        </div>
+        <button class="math-calc-btn" onclick="solveDefiniteIntegral()">Вычислить по Ньютону-Лейбницу</button>
+      </div>
+
+      <div class="math-card" id="card-int-sin">
+        <div class="math-card-title">
+          <span>Интеграл от синуса: $\int \sin(kx)\,dx$</span>
+        </div>
+        <div class="math-input-group">
+          <span class="math-input-label">Коэффициент $k$ (например: 3):</span>
+          <input type="number" class="math-input" id="sinK" value="3">
+        </div>
+        <button class="math-calc-btn" style="background: #8b5cf6;" onclick="solveSinIntegral()">Найти $\int \sin(kx)\,dx$</button>
+      </div>
+    </div>
+
+    <!-- 6. Панель Пределы (№23–27) -->
+    <div class="math-panel" id="panelLimits">
+      <div class="math-card" id="card-limit-inf">
+        <div class="math-card-title">
+          <span>Предел на бесконечности: $\lim_{x \to \infty} \frac{ax^n + \dots}{bx^m + \dots}$</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Коэф. числителя ($a$):</span>
+            <input type="number" class="math-input" id="limA" value="4">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Степень ($n$):</span>
+            <input type="number" class="math-input" id="limN" value="5">
+          </div>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Коэф. знамен. ($b$):</span>
+            <input type="number" class="math-input" id="limB" value="-1">
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Степень ($m$):</span>
+            <input type="number" class="math-input" id="limM" value="5">
+          </div>
+        </div>
+        <button class="math-calc-btn" onclick="solveLimitInfinity()">Рассчитать предел $\lim_{x \to \infty}$</button>
+      </div>
+    </div>
+
+    <!-- 7. Панель Векторы & Прямая (№28–31) -->
+    <div class="math-panel" id="panelVectors">
+      <div class="math-card" id="card-vec-dot">
+        <div class="math-card-title">
+          <span>Скалярное произведение $\vec{a} \cdot \vec{b}$</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">$\vec{a} (x, y, z)$:</span>
+            <div style="display: flex; gap: 4px;">
+              <input type="number" class="math-input" id="vecA_x" value="2" placeholder="x">
+              <input type="number" class="math-input" id="vecA_y" value="1" placeholder="y">
+              <input type="number" class="math-input" id="vecA_z" value="-3" placeholder="z">
+            </div>
+          </div>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">$\vec{b} (x, y, z)$:</span>
+            <div style="display: flex; gap: 4px;">
+              <input type="number" class="math-input" id="vecB_x" value="-3" placeholder="x">
+              <input type="number" class="math-input" id="vecB_y" value="1" placeholder="y">
+              <input type="number" class="math-input" id="vecB_z" value="8" placeholder="z">
+            </div>
+          </div>
+        </div>
+        <button class="math-calc-btn" onclick="solveDotProduct()">Вычислить $\vec{a} \cdot \vec{b}$</button>
+      </div>
+
+      <div class="math-card" id="card-vec-line">
+        <div class="math-card-title">
+          <span>Уравнение прямой через 2 точки $A(x_1, y_1)$ и $B(x_2, y_2)$</span>
+        </div>
+        <div class="math-inputs-row">
+          <div class="math-input-group">
+            <span class="math-input-label">Точка A ($x_1, y_1$):</span>
+            <div style="display: flex; gap: 4px;">
+              <input type="number" class="math-input" id="lineA_x" value="7" placeholder="x1">
+              <input type="number" class="math-input" id="lineA_y" value="2" placeholder="y1">
+            </div>
+          </div>
+          <div class="math-input-group">
+            <span class="math-input-label">Точка B ($x_2, y_2$):</span>
+            <div style="display: flex; gap: 4px;">
+              <input type="number" class="math-input" id="lineB_x" value="11" placeholder="x2">
+              <input type="number" class="math-input" id="lineB_y" value="-3" placeholder="y2">
+            </div>
+          </div>
+        </div>
+        <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveLine2D()">Составить каноническое и общее ур-е</button>
+      </div>
+    </div>
+
+    <!-- Выдвижная шторка пошагового решения и произношения для комиссии -->
+    <div class="solution-drawer" id="solutionDrawer">
+      <div class="drawer-header">
+        <span class="drawer-title" id="drawerTitle">
+          <span>📐 Пошаговое решение для билета</span>
+        </span>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+      </div>
+
+      <div class="solution-result-badge" id="drawerResult">Ответ: 1330</div>
+
+      <div class="solution-steps-box" id="drawerSteps">
+        <!-- Шаги решения KaTeX -->
+      </div>
+
+      <!-- Чистовик для комиссии: как писать на листке слово в слово -->
+      <div class="drawer-sheet-box" id="drawerSheet" style="display: none;"></div>
+
+      <div class="drawer-pronounce-box" id="drawerPronounce">
+        <!-- Произношение для комиссии -->
+      </div>
+    </div>
+  </div>
+
+  <script defer src="tickets-data.js"></script>
+  <script defer src="calc.js"></script>
+</body>
+</html>

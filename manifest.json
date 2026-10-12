@@ -1,0 +1,18 @@
+{
+  "name": "Калькулятор",
+  "short_name": "Калькулятор",
+  "description": "Инженерный калькулятор высшей математики с пошаговыми решениями",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='44' fill='%231c1c1e'/><rect x='44' y='36' width='104' height='32' rx='8' fill='%232c2c2e'/><circle cx='62' cy='100' r='12' fill='%23505052'/><circle cx='96' cy='100' r='12' fill='%23505052'/><circle cx='130' cy='100' r='12' fill='%23ff9f0a'/><circle cx='62' cy='134' r='12' fill='%23505052'/><circle cx='96' cy='134' r='12' fill='%23505052'/><circle cx='130' cy='134' r='12' fill='%23ff9f0a'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
