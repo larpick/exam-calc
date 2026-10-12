@@ -1,7 +1,15 @@
 // Калькулятор высшей математики для комиссии (PWA)
 // Регистрация Service Worker для офлайн-работы
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    reg.update();
+  }).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!window.__swReloaded) {
+      window.__swReloaded = true;
+      window.location.reload();
+    }
+  });
 }
 
 // Вспомогательная функция для безопасного рендеринга KaTeX формул
@@ -930,14 +938,19 @@ window.closeDrawer = function() {
 // ----------------------------------------------------
 window.toggleTicketBar = function() {
   const bar = document.getElementById('ticketJumpBar');
+  const badge = document.getElementById('openTicketBadge');
   if (!bar) return;
-  const isHidden = bar.style.display === 'none' || !bar.style.display;
-  bar.style.display = isHidden ? 'flex' : 'none';
+  const isHidden = (bar.style.display === 'none' || getComputedStyle(bar).display === 'none');
   if (isHidden) {
+    bar.style.display = 'flex';
+    if (badge) badge.style.display = 'none';
     const inp = document.getElementById('ticketSearchInput');
     if (inp) {
       setTimeout(() => inp.focus(), 50);
     }
+  } else {
+    bar.style.display = 'none';
+    if (badge) badge.style.display = 'inline-flex';
   }
 };
 
@@ -945,9 +958,6 @@ window.pickTicketQuick = function(ticketKey) {
   if (typeof window.jumpToTicket === 'function') {
     window.jumpToTicket(ticketKey);
   }
-  // Мягко скрываем панель выбора после того, как билет выбран
-  const bar = document.getElementById('ticketJumpBar');
-  if (bar) bar.style.display = 'none';
 };
 
 window.handleTicketSearch = function(query) {

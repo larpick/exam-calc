@@ -17,20 +17,22 @@
 <body>
 
   <div class="calc-app">
-    <!-- Верхняя незаметная панель со звездочкой -->
+    <!-- Верхняя панель управления билетами и маскировкой -->
     <div class="app-topbar">
       <div class="app-title-area" onclick="toggleTicketBar()" title="Билеты">
         <span class="app-title">Калькулятор</span>
       </div>
-      <button class="secret-star-btn" id="starToggleBtn" onclick="toggleTicketBar()" aria-label="Билеты" title="Билеты">⭐</button>
+      <div class="app-topbar-actions">
+        <button class="ticket-open-badge" id="openTicketBadge" onclick="toggleTicketBar()" style="display: none;" title="Открыть быстрый выбор билетов">🔍 Билеты ⚡</button>
+        <button class="secret-star-btn" id="starToggleBtn" onclick="toggleTicketBar()" aria-label="Билеты" title="Билеты">⭐</button>
+      </div>
     </div>
 
-    <!-- Быстрый селектор по номеру билета (скрыт по умолчанию) -->
-    <!-- Быстрый селектор по номеру билета (скрыт по умолчанию) -->
-    <div class="ticket-jump-bar" id="ticketJumpBar" style="display: none;">
+    <!-- Быстрый выбор билета: живой поиск и сетка номеров (ОТКРЫТА ПО УМОЛЧАНИЮ) -->
+    <div class="ticket-jump-bar" id="ticketJumpBar" style="display: flex;">
       <div class="ticket-bar-header">
         <span class="ticket-bar-title">⚡ БЫСТРЫЙ ВЫБОР БИЛЕТА</span>
-        <button class="ticket-bar-close" onclick="toggleTicketBar()" type="button" title="Закрыть">✕</button>
+        <button class="ticket-bar-close" onclick="toggleTicketBar()" type="button" title="Скрыть панель (Маскировка)">🎭 Скрыть</button>
       </div>
 
       <!-- Живой поиск -->

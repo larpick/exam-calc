@@ -1,5 +1,5 @@
 // Service Worker для 100% офлайн работы калькулятора в аудитории
-const CACHE_NAME = 'exam-calc-v5';
+const CACHE_NAME = 'exam-calc-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -27,23 +27,37 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Для открытия страницы (HTML) — СНАЧАЛА СЕТЬ (Network-First), чтобы сразу подтягивать свежие обновления,
+  // а при отсутствии интернета на экзамене — мгновенный возврат оффлайн-кэша!
+  if (event.request.mode === 'navigate' || event.request.destination === 'document') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Для остальных файлов (css, js, шрифты): сначала кэш, а в фоне тихо обновляем из сети
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).then(networkResponse => {
-        if (!networkResponse || networkResponse.status !== 200) {
-          return networkResponse;
+      const fetchPromise = fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
+      }).catch(() => {});
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
