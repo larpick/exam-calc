@@ -152,18 +152,36 @@ window.calcInput = function(type, val) {
       if (typeof res === 'number' && !isNaN(res) && isFinite(res)) {
         const rounded = parseFloat(res.toFixed(8));
         const oldExpr = displayValue;
-        historyText = `${oldExpr} =`;
+        const frac = reduceFractionHelper(oldExpr, res);
+
+        let resText = `🎯 Ответ: ${rounded}`;
+        let steps = [
+          `💡 <b>Вычисление:</b> $${oldExpr.replace(/×/g, ' \\cdot ').replace(/÷/g, ' : ')} = ${rounded}$`
+        ];
+
+        if (frac && frac.str && frac.rDen !== 1) {
+          historyText = `${oldExpr} = [${frac.str}] =`;
+          resText = `🎯 Ответ: <b>${frac.str}</b> (или ${rounded})`;
+          if (frac.isExact && frac.gcd > 1) {
+            steps.push(`📐 <b>Сокращение дроби:</b><br>$$\\frac{${frac.num}}{${frac.den}} = \\frac{${frac.num} : ${frac.gcd}}{${frac.den} : ${frac.gcd}} = \\mathbf{\\frac{${frac.rNum}}{${frac.rDen}}}$$<br>• Числитель и знаменатель разделили на наибольший общий делитель <b>${frac.gcd}</b>.`);
+          } else if (frac.isExact) {
+            steps.push(`📐 <b>Дробь уже несократима:</b> $\\mathbf{\\frac{${frac.rNum}}{${frac.rDen}}}$`);
+          } else {
+            steps.push(`📐 <b>Представление в виде обыкновенной дроби:</b> $\\mathbf{\\frac{${frac.rNum}}{${frac.rDen}}}$`);
+          }
+        } else {
+          historyText = `${oldExpr} =`;
+        }
+
         displayValue = `${rounded}`;
         isEvaluated = true;
 
         showDrawer({
-          title: "Арифметическое вычисление",
-          resultText: `🎯 Ответ: ${displayValue}`,
-          steps: [
-            `💡 <b>Вычисление:</b> $${oldExpr.replace(/×/g, ' \\cdot ').replace(/÷/g, ' : ')} = ${displayValue}$`
-          ],
-          formulaPronounce: `вычисление выражения с отрицательными числами и скобками`,
-          realPronounce: `${oldExpr} равно ${displayValue}`
+          title: frac && frac.rDen !== 1 ? "Вычисление и сокращение дроби" : "Арифметическое вычисление",
+          resultText: resText,
+          steps: steps,
+          formulaPronounce: frac && frac.rDen !== 1 ? `несократимая дробь: ${frac.rNum} делить на ${frac.rDen}` : `вычисление выражения с отрицательными числами и скобками`,
+          realPronounce: frac && frac.rDen !== 1 ? `${oldExpr} равно ${frac.rNum} к ${frac.rDen}, или ${rounded}` : `${oldExpr} равно ${displayValue}`
         });
       } else {
         historyText = 'Ошибка';
@@ -175,6 +193,74 @@ window.calcInput = function(type, val) {
   }
   updateDisplay();
 };
+
+// Вспомогательная функция для автоматического сокращения дробей
+function reduceFractionHelper(expr, res) {
+  function gcd(a, b) {
+    a = Math.abs(Math.round(a));
+    b = Math.abs(Math.round(b));
+    while (b) {
+      let t = b;
+      b = a % b;
+      a = t;
+    }
+    return a || 1;
+  }
+
+  // 1. Проверяем прямое деление двух целых чисел вида A ÷ B или A / B
+  const clean = (expr || '').replace(/\s+/g, '').replace(/÷/g, '/');
+  const m = clean.match(/^\(?(-?\d+)\)?\/\(?(-?\d+)\)?$/);
+  if (m) {
+    let num = parseInt(m[1], 10);
+    let den = parseInt(m[2], 10);
+    if (den !== 0) {
+      let sign = (num * den < 0) ? -1 : 1;
+      let absNum = Math.abs(num);
+      let absDen = Math.abs(den);
+      let g = gcd(absNum, absDen);
+      let rNum = (absNum / g) * sign;
+      let rDen = absDen / g;
+      if (rDen === 1) {
+        return { num: num, den: den, gcd: g, rNum: rNum, rDen: rDen, str: `${rNum}`, isExact: true };
+      }
+      return {
+        num: num,
+        den: den,
+        gcd: g,
+        rNum: rNum,
+        rDen: rDen,
+        str: `${rNum}/${rDen}`,
+        latex: `\\frac{${rNum}}{${rDen}}`,
+        isExact: true
+      };
+    }
+  }
+
+  // 2. Если результат res — нецелое число, подбираем точную несократимую дробь со знаменателем до 1000
+  if (typeof res === 'number' && !Number.isInteger(res) && isFinite(res)) {
+    const sign = res < 0 ? -1 : 1;
+    const absVal = Math.abs(res);
+    for (let d = 2; d <= 1000; d++) {
+      let n = Math.round(absVal * d);
+      if (Math.abs(absVal - n / d) < 1e-7) {
+        let g = gcd(n, d);
+        let rNum = (n / g) * sign;
+        let rDen = d / g;
+        return {
+          num: n,
+          den: d,
+          gcd: g,
+          rNum: rNum,
+          rDen: rDen,
+          str: `${rNum}/${rDen}`,
+          latex: `\\frac{${rNum}}{${rDen}}`,
+          isExact: false
+        };
+      }
+    }
+  }
+  return null;
+}
 
 // ----------------------------------------------------
 // 2. Переключение вкладок режимов

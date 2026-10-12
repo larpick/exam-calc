@@ -157,12 +157,24 @@
           </div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button class="math-calc-btn" onclick="solveCombinations()">Найти $C_n^k$ (порядок НЕ важен)</button>
-          <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveArrangements()">Найти $A_n^k$ (порядок важен)</button>
+          <button class="math-calc-btn" onclick="solveCombinations()">
+            <div>👥 Сочетания $C_n^k$</div>
+            <div style="font-size: 11px; font-weight: 500; opacity: 0.9; margin-top: 3px;">(Делегаты, люди, фрукты, комиссия)</div>
+          </button>
+          <button class="math-calc-btn" style="background: #3b82f6;" onclick="solveArrangements()">
+            <div>🔢 Размещения $A_n^k$</div>
+            <div style="font-size: 11px; font-weight: 500; opacity: 0.9; margin-top: 3px;">(Числа, шифры, староста+зам)</div>
+          </button>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <button class="math-calc-btn" style="background: #8b5cf6;" onclick="solvePermutations()">Перестановки $P_n = n!$</button>
-          <button class="math-calc-btn" style="background: #ec4899;" onclick="solveRepeatCombinations()">С повторениями $\bar{C}_n^k$</button>
+          <button class="math-calc-btn" style="background: #8b5cf6;" onclick="solvePermutations()">
+            <div>🔀 Перестановки $P_n = n!$</div>
+            <div style="font-size: 11px; font-weight: 500; opacity: 0.9; margin-top: 3px;">(Слово «ТЕОРИЯ», книги в ряд)</div>
+          </button>
+          <button class="math-calc-btn" style="background: #ec4899;" onclick="solveRepeatCombinations()">
+            <div>🍰 С повторами $\bar{C}_n^k$</div>
+            <div style="font-size: 11px; font-weight: 500; opacity: 0.9; margin-top: 3px;">(Пирожные в театре, покупки)</div>
+          </button>
         </div>
       </div>
 
@@ -180,7 +192,10 @@
             <input type="number" class="math-input" id="probTotalN" value="9" min="1">
           </div>
         </div>
-        <button class="math-calc-btn" style="background: #10b981;" onclick="solveClassicProb()">Рассчитать вероятность $P(A)$</button>
+        <button class="math-calc-btn" style="background: #10b981; padding: 12px 10px;" onclick="solveClassicProb()">
+          <div style="font-size: 15px;">🎲 Рассчитать вероятность $P(A) = \frac{m}{n}$</div>
+          <div style="font-size: 11px; font-weight: 500; opacity: 0.95; margin-top: 3px;">(Шары в урне, колода карт, кубик)</div>
+        </button>
       </div>
     </div>
 
