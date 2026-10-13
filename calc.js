@@ -282,6 +282,8 @@ document.querySelectorAll('.mode-pill').forEach(pill => {
     // Скрываем все панели
     const std = document.getElementById('panelStandard');
     if (std) std.style.display = mode === 'standard' ? 'grid' : 'none';
+    const disp = document.getElementById('calcDisplay');
+    if (disp) disp.style.display = mode === 'trainer' ? 'none' : 'flex';
     document.querySelectorAll('.math-panel').forEach(p => p.classList.remove('active'));
 
     const activePanelMap = {
@@ -290,9 +292,14 @@ document.querySelectorAll('.mode-pill').forEach(pill => {
       derivatives: 'panelDerivatives',
       integrals: 'panelIntegrals',
       limits: 'panelLimits',
-      vectors: 'panelVectors'
+      vectors: 'panelVectors',
+      trainer: 'panelTrainer'
     };
 
+    if (mode === 'trainer') {
+      if (typeof window.renderCards === 'function') window.renderCards();
+      if (typeof window.updateProgress === 'function') window.updateProgress();
+    }
     if (activePanelMap[mode]) {
       const targetPanel = document.getElementById(activePanelMap[mode]);
       if (targetPanel) {
@@ -938,19 +945,16 @@ window.closeDrawer = function() {
 // ----------------------------------------------------
 window.toggleTicketBar = function() {
   const bar = document.getElementById('ticketJumpBar');
-  const badge = document.getElementById('openTicketBadge');
   if (!bar) return;
   const isHidden = (bar.style.display === 'none' || getComputedStyle(bar).display === 'none');
   if (isHidden) {
     bar.style.display = 'flex';
-    if (badge) badge.style.display = 'none';
     const inp = document.getElementById('ticketSearchInput');
     if (inp) {
       setTimeout(() => inp.focus(), 50);
     }
   } else {
     bar.style.display = 'none';
-    if (badge) badge.style.display = 'inline-flex';
   }
 };
 

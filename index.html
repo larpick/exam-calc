@@ -10,6 +10,7 @@
   <meta name="theme-color" content="#000000">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="trainer.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -22,10 +23,7 @@
       <div class="app-title-area" onclick="toggleTicketBar()" title="Билеты">
         <span class="app-title">Калькулятор</span>
       </div>
-      <div class="app-topbar-actions">
-        <button class="ticket-open-badge" id="openTicketBadge" onclick="toggleTicketBar()" style="display: none;" title="Открыть быстрый выбор билетов">🔍 Билеты ⚡</button>
-        <button class="secret-star-btn" id="starToggleBtn" onclick="toggleTicketBar()" aria-label="Билеты" title="Билеты">⭐</button>
-      </div>
+      <button class="secret-star-btn" id="starToggleBtn" onclick="toggleTicketBar()" aria-label="Билеты" title="Билеты">⭐</button>
     </div>
 
     <!-- Быстрый выбор билета: живой поиск и сетка номеров (ОТКРЫТА ПО УМОЛЧАНИЮ) -->
@@ -126,6 +124,8 @@
     <!-- Верхняя панель режимов (встроена открыто) -->
     <div class="mode-bar">
       <button class="mode-pill active" data-mode="standard">🔢 Стандарт</button>
+      <button class="mode-pill" data-mode="trainer" style="border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700;">📚 Тренажёр (47 билетов)</button>
+      
       <button class="mode-pill" data-mode="prob">🎲 Тервер (Т1-6, П1-10)</button>
       <button class="mode-pill" data-mode="matrices">🔲 Матрицы & Крамер (№1–8)</button>
       <button class="mode-pill" data-mode="derivatives">📈 Производные (№9–15)</button>
@@ -458,6 +458,627 @@
       </div>
     </div>
 
+    
+    <!-- 8. Вкладка Тренажёр и База всех 47 билетов (из test-math, без таймера) -->
+    <div class="math-panel" id="panelTrainer" style="display: none; padding: 12px 6px;">
+      <div style="margin-bottom: 16px; text-align: center;">
+        <h2 style="font-size: 19px; font-weight: 800; color: #38bdf8; margin-bottom: 4px;">📚 База всех 47 билетов & Тренажёр</h2>
+        <p style="font-size: 12.5px; color: #94a3b8; margin: 0;">Пошаговые решения, чистовики, шпаргалка формул и ловушки комиссии</p>
+      </div>
+      <div class="progress-card">
+        <div class="progress-header">
+          <span class="progress-title">📊 Общий прогресс выученных билетов</span>
+          <span class="progress-score" id="progressScore">0% готово</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-stats">
+          <div class="stat-item">Всего выучено: <strong id="statCount">0 из 47</strong></div>
+          <div class="stat-item">Теория вероятностей: <strong id="statProb">0/16</strong></div>
+          <div class="stat-item">Высшая математика: <strong id="statMath">0/31</strong></div>
+        </div>
+      </div>
+
+      <!-- Навигация по разделам -->
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="all">Все задания <span class="tab-count">0/47</span></button>
+        <button class="tab-btn tab-unlearned" data-tab="unlearned">⚡ Осталось выучить <span class="tab-count" id="tabUnlearnedCount">47</span></button>
+        <button class="tab-btn" data-tab="prob">Теория вероятностей <span class="tab-count">0/16</span></button>
+        <button class="tab-btn" data-tab="math">Вышмат (Все) <span class="tab-count">0/31</span></button>
+        <button class="tab-btn" data-tab="math_matrices">Матрицы & Крамер (1–8)</button>
+        <button class="tab-btn" data-tab="math_derivatives">Производные (9–15)</button>
+        <button class="tab-btn" data-tab="math_integrals">Интегралы & Площади (16–22)</button>
+        <button class="tab-btn" data-tab="math_limits">Пределы (23–27)</button>
+        <button class="tab-btn" data-tab="math_vectors">Векторы & Прямая (28–31)</button>
+        <button class="tab-btn" data-tab="formulas">📋 Шпаргалка формул</button>
+        <button class="tab-btn tab-traps" data-tab="traps">🔥 Ловушки комиссии (Топ-10)</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="margin-top: 24px;">
+    <!-- Панель управления -->
+    <div class="controls-bar" id="controlsBar">
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="text" class="search-input" id="searchInput" placeholder="Быстрый поиск по номеру или условию...">
+        <button class="active-recall-toggle-btn" id="btnRecallToggle" onclick="toggleActiveRecallMode()" title="В режиме экзамена скрываются формулы и ответы для самопроверки">
+          <span class="recall-icon">🧠</span>
+          <span class="recall-text">Режим экзамена (скрыть формулы)</span>
+        </button>
+      </div>
+      <button class="toggle-all-btn" onclick="toggleAllSolutions()">Показать / скрыть все решения</button>
+    </div>
+
+    <!-- Контейнер для карточек с задачами -->
+    <div class="cards-list" id="cardsContainer"></div>
+
+    <!-- Вкладка Шпаргалка с формулами -->
+    <div id="formulasContainer" style="display: none;">
+      <!-- Раздел 1. Комбинаторика и Теорвер -->
+      <section class="formula-section">
+        <h2 class="formula-section-title">🎲 1. Теория вероятностей и комбинаторика</h2>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <div class="formula-card-title">Классическая вероятность</div>
+            <div class="formula-math">$P(A) = \frac{m}{n} \quad (0 \le P(A) \le 1)$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Пэ от А равно эм делить на эн»</em>
+              </div>
+              </div>
+            <div class="formula-desc">$m$ — число исходов, благоприятствующих событию; $n$ — общее число всех равновозможных исходов. Всегда: $0 \le P(A) \le 1$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Факториал</div>
+            <div class="formula-math">$n! = 1 \cdot 2 \cdot 3 \cdots n, \quad 0! = 1$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Эн факториал; ноль факториал равен единице»</em>
+              </div>
+              </div>
+            <div class="formula-desc">$0! = 1$ и $1! = 1$. Примеры: $3! = 6$, $4! = 24$, $5! = 120$, $6! = 720$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Сочетания без повторений (порядок НЕ важен)</div>
+            <div class="formula-math">$C_n^k = \frac{n!}{k!(n - k)!}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Цэ из эн по ка равно эн факториал делить на ка факториал и на скобку эн минус ка факториал»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Выборки людей в комиссию, выбор шаров из урны, выбор карт из колоды. Свойство: $C_n^k = C_n^{n-k}$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Размещения без повторений (порядок ВАЖЕН)</div>
+            <div class="formula-math">$A_n^k = \frac{n!}{(n - k)!}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«А из эн по ка равно эн факториал делить на эн минус ка факториал»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Составление чисел из цифр ($12 \neq 21$), распределение должностей (председатель и секретарь).</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Перестановки без повторений</div>
+            <div class="formula-math">$P_n = n!$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Пэ с индексом эн равно эн факториал»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Перестановка всех $n$ элементов. Составление слова из карточек (например, ТЕОРИЯ $\to 6! = 720$).</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Сочетания с повторениями</div>
+            <div class="formula-math">$\bar{C}_n^k = C_{n+k-1}^k = \frac{(n+k-1)!}{k!(n-1)!}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Цэ с чертой из эн по ка равно цэ из эн плюс ка минус один по ка»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Покупка $k$ предметов $n$ видов (например, 10 пирожных 4 видов $\to C_{4+10-1}^{10} = C_{13}^{10} = C_{13}^3 = 286$).</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Раздел 2. Матрицы и Крамер -->
+      <section class="formula-section">
+        <h2 class="formula-section-title">🔢 2. Матрицы, Определители и СЛАУ</h2>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <div class="formula-card-title">Определитель матрицы 2×2</div>
+            <div class="formula-math">$\det A = \begin{vmatrix} a_{11} & a_{12} \\ a_{21} & a_{22} \end{vmatrix} = a_{11}a_{22} - a_{12}a_{21}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Определитель матрицы А: а-один-один на а-два-два минус а-один-два на а-два-один»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Главная диагональ минус побочная диагональ.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Умножение матриц</div>
+            <div class="formula-math">$c_{ij} = \sum_{k=1}^m a_{ik} b_{kj}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Цэ-и-житое равно сумме произведений элементов и-той строки на жи-тый столбец»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Каждый элемент — сумма произведений элементов $i$-й строки матрицы $A$ на соответствующие элементы $j$-го столбца матрицы $B$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Транспонирование матрицы ($A^T$)</div>
+            <div class="formula-math">$A^T = (a_{ji})$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«А транспонированная (строки стали столбцами)»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Строки исходной матрицы становятся столбцами новой матрицы.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Формулы Крамера</div>
+            <div class="formula-math">$x = \frac{\Delta_x}{\Delta}, \quad y = \frac{\Delta_y}{\Delta}, \quad z = \frac{\Delta_z}{\Delta}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Икс равен дельта-икс делить на дельта; игрек — дельта-игрек на дельта; зет — дельта-зет на дельта»</em>
+              </div>
+              </div>
+            <div class="formula-desc">$\Delta$ — определитель из коэффициентов при неизвестных. $\Delta_x, \Delta_y, \Delta_z$ — определители, где соответствующий столбец заменен свободными членами.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Раздел 3. Производные -->
+      <section class="formula-section">
+        <h2 class="formula-section-title">⚡ 3. Таблица и правила производных</h2>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <div class="formula-card-title">Степенная функция</div>
+            <div class="formula-math">$(x^n)' = n x^{n-1}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Производная икс в степени эн равна эн умножить на икс в степени эн минус один»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Примеры: $(x^5)' = 5x^4$, $(x^2)' = 2x$, $(x)' = 1$, $(c)' = 0$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Произведение функций</div>
+            <div class="formula-math">$(u \cdot v)' = u'v + uv'$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Производная у на вэ равна: у штрих на вэ плюс у на вэ штрих»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $(x^4 \cos x)' = 4x^3 \cos x - x^4 \sin x$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Дробь (частное)</div>
+            <div class="formula-math">$\left(\frac{u}{v}\right)' = \frac{u'v - uv'}{v^2}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Производная у делить на вэ: у штрих на вэ минус у на вэ штрих, делить на вэ в квадрате»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $\left(\frac{\sin x}{x^2}\right)' = \frac{x \cos x - 2 \sin x}{x^3}$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Сложная функция (Цепочка)</div>
+            <div class="formula-math">$(f(g(x)))' = f'(g(x)) \cdot g'(x)$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Производная внешней функции по внутренней, умножить на производную внутренней»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $((2x + 6)^{10})' = 10(2x + 6)^9 \cdot 2 = 20(2x + 6)^9$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Дифференциал функции</div>
+            <div class="formula-math">$df(x) = f'(x)\,dx$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Дэ-эф от икс равен эф штрих от икс дэ-икс»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Берём обычную производную $f'(x)$ и просто умножаем на $dx$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Исследование на возрастание/убывание</div>
+            <div class="formula-math">$f'(x) > 0 \implies \nearrow, \quad f'(x) < 0 \implies \searrow$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Эф штрих больше нуля — возрастает; меньше нуля — убывает»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Критические точки: $f'(x) = 0$. Метод интервалов определяет знаки производной.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Раздел 4. Интегралы -->
+      <section class="formula-section">
+        <h2 class="formula-section-title">∫ 4. Таблица интегралов и площади</h2>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <div class="formula-card-title">Степенная функция</div>
+            <div class="formula-math">$\int x^n\,dx = \frac{x^{n+1}}{n+1} + C$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Интеграл икс в степени эн дэ-икс равен икс в степени эн плюс один делить на эн плюс один, плюс константа Цэ»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $\int 3x^6\,dx = \frac{3}{7}x^7 + C$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Показательная функция</div>
+            <div class="formula-math">$\int e^x\,dx = e^x + C, \quad \int a^x\,dx = \frac{a^x}{\ln a} + C$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Интеграл е в степени икс равен е в степени икс; интеграл а в степени икс равен а в степени икс на натуральный логарифм а, плюс Цэ»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $\int (3e^x - 3^x)\,dx = 3e^x - \frac{3^x}{\ln 3} + C$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Линейная подстановка ($kx + b$)</div>
+            <div class="formula-math">$\int (kx + b)^n\,dx = \frac{1}{k}\frac{(kx + b)^{n+1}}{n+1} + C$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Единица на ка, умножить на скобку ка-икс плюс бэ в степени эн плюс один делить на эн плюс один, плюс Цэ»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Пример: $\int (2x + 4)^6\,dx = \frac{1}{2}\frac{(2x + 4)^7}{7} = \frac{(2x + 4)^7}{14} + C$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Формула Ньютона-Лейбница</div>
+            <div class="formula-math">$\int_a^b f(x)\,dx = F(b) - F(a)$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Интеграл от а до бэ от эф от икс дэ-икс равен: первообразная эф большое в точке бэ минус эф большое в точке а»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Вычисляем первообразную в верхней точке $b$ и вычитаем значение в нижней точке $a$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Площадь криволинейной трапеции</div>
+            <div class="formula-math">$S = \int_a^b f(x)\,dx$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Площадь Эс равна определённому интегралу от а до бэ от функции эф от икс дэ-икс»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Площадь под кривой $y = f(x)$ от $x = a$ до $x = b$ над осью $Ox$.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Раздел 5. Пределы и Векторы -->
+      <section class="formula-section">
+        <h2 class="formula-section-title">📐 5. Пределы, Векторы и Прямая</h2>
+        <div class="formula-grid">
+          <div class="formula-card">
+            <div class="formula-card-title">Пределы на бесконечности $[\infty / \infty]$</div>
+            <div class="formula-math">$\lim_{x \to \infty} \frac{P(x)}{Q(x)}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Предел при икс стремящемся к бесконечности от дроби Пэ от икс делить на Ку от икс»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Отношение старших степеней:<br>• Степени равны $\to$ отношение коэффициентов ($\frac{4x^5}{-x^5} = -4$).<br>• Числитель старше $\to \infty$.<br>• Знаменатель старше $\to 0$.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Скалярное произведение векторов</div>
+            <div class="formula-math">$\vec{a} \cdot \vec{b} = a_x b_x + a_y b_y + a_z b_z$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Скалярное произведение векторов а и бэ: а-икс на бэ-икс плюс а-игрек на бэ-игрек плюс а-зет на бэ-зет»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Сумма произведений соответствующих координат (результат — число).</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Смешанное произведение $(\vec{a}, \vec{b}, \vec{c})$</div>
+            <div class="formula-math">$(\vec{a}, \vec{b}, \vec{c}) = \begin{vmatrix} a_x & a_y & a_z \\ b_x & b_y & b_z \\ c_x & c_y & c_z \end{vmatrix}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Смешанное произведение векторов а, бэ, цэ равно определителю третьего порядка из их координат»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Определитель 3×3, где строки — координаты векторов $\vec{a}, \vec{b}, \vec{c}$. Геометрический смысл: объём параллелепипеда.</div>
+          </div>
+
+          <div class="formula-card">
+            <div class="formula-card-title">Уравнение прямой по двум точкам</div>
+            <div class="formula-math">$\frac{x - x_1}{x_2 - x_1} = \frac{y - y_1}{y_2 - y_1}$</div>
+            <div class="formula-pronounce" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <span class="pronounce-icon">🗣️</span> <b>Как читать:</b> <em>«Икс минус икс-один делить на икс-два минус икс-один равно игрек минус игрек-один делить на игрек-два минус игрек-один»</em>
+              </div>
+              </div>
+            <div class="formula-desc">Каноническое уравнение прямой через точки $A(x_1, y_1)$ и $B(x_2, y_2)$. По пропорции переводится в общее: $Ax + By + C = 0$.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Вкладка Ловушки комиссии (Топ-10) -->
+    <div id="trapsContainer" style="display: none;" class="traps-container">
+      <div class="traps-header-banner">
+        <h2>🔥 ТОП-10 ловушек комиссии, на которых срезают за 30 секунд</h2>
+        <p>Преподаватели на комиссии часто не ждут решения длинных примеров, а задают один быстрый теоретический вопрос с подвохом. Выучи эти 10 железобетонных ответов — они спасут твой экзамен!</p>
+      </div>
+
+      <!-- Ловушка 1 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №1</span>
+            <span class="trap-category-tag">Теория вероятностей • Факториалы</span>
+          </div>
+          </div>
+        <div class="trap-question">«Чему равен $0!$ (ноль факториал) и почему он не равен нулю?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются 90% студентов:</div>
+            «Ноль, потому что мы ничего не перемножаем или начинаем с нуля». За такой ответ преподаватель сразу снижает оценку.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            <b>$0! = 1$</b> (строго единица!). Это фундаментальное соглашение математики и свойство гамма-функции.
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Из рекуррентной формулы $n! = n \cdot (n - 1)!$ при $n = 1$ получаем: $1! = 1 \cdot (1 - 1)! \implies 1 = 1 \cdot 0! \implies 0! = 1$. Кроме того, количество способов упорядочить пустое множество предметов ровно одно.
+        </div>
+      </div>
+
+      <!-- Ловушка 2 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №2</span>
+            <span class="trap-category-tag">Теория вероятностей • Аксиоматика</span>
+          </div>
+          </div>
+        <div class="trap-question">«Может ли вероятность события быть равной 1.25 или $-0.1$?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Путают доли с процентами или допускают в вычислениях отрицательные числа и сдают ответ $P = 1.3$.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Категорически <b>НЕТ!</b> Аксиома Колмогорова: всегда <b>$0 \le P(A) \le 1$</b> (или от 0% до 100%).
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Вероятность невозможного события $P(\varnothing) = 0$, достоверного события $P(\Omega) = 1$. Если в билете получилось значение меньше нуля или больше единицы — в расчетах грубейшая ошибка.
+        </div>
+      </div>
+
+      <!-- Ловушка 3 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №3</span>
+            <span class="trap-category-tag">Комбинаторика • Выбор формулы</span>
+          </div>
+          </div>
+        <div class="trap-question">«В чём разница между $A_n^k$ и $C_n^k$? Как сходу понять, какую формулу брать в задаче?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Начинают гадать или путать названия формул: «Ну там где-то делят на $k!$, а где-то нет».
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Смотрим строго на <b>ПОРЯДОК</b> элементов: важен он или безразличен!
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong><br>
+          • <b>Порядок ВАЖЕН</b> $\to$ <b>Размещения $A_n^k$</b> (составить число из цифр: 12 и 21 разные; выбрать старосту и заместителя).<br>
+          • <b>Порядок НЕ важен</b> $\to$ <b>Сочетания $C_n^k$</b> (выбрать делегацию из 3 человек; достать 2 шара из урны; взять 4 карты из колоды).
+        </div>
+      </div>
+
+      <!-- Ловушка 4 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №4</span>
+            <span class="trap-category-tag">Матрицы & СЛАУ • Метод Крамера</span>
+          </div>
+          </div>
+        <div class="trap-question">«Что происходит, если главный определитель системы $\Delta = 0$? Имеет ли система решения?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Отвечают: «Система не имеет решений». Это неполный ответ, за который снижают балл!
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            <b>Метод Крамера неприменим</b> (на ноль делить нельзя!). А у самой системы два возможных случая.
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong><br>
+          1) Если хотя бы один из вспомогательных определителей $\Delta_x \ne 0$ или $\Delta_y \ne 0$ — <b>решений нет</b> (система несовместна).<br>
+          2) Если ВСЕ определители равны нулю ($\Delta = \Delta_x = \Delta_y = 0$) — <b>бесконечно много решений</b> (система совместна и неопределенна). Систему исследуют методом Гаусса.
+        </div>
+      </div>
+
+      <!-- Ловушка 5 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №5</span>
+            <span class="trap-category-tag">Интегральное исчисление • Неопределенный интеграл</span>
+          </div>
+          </div>
+        <div class="trap-question">«Зачем мы обязаны писать $+ C$ в неопределённом интеграле? Что будет, если забыть?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            «Просто по формуле положено» или забывают написать $+ C$ на доске — преподаватель сразу отправляет на пересдачу.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Неопределённый интеграл — это не одна функция, а <b>целое семейство всех первообразных</b>!
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Производная любой постоянной равна нулю: $(F(x) + C)' = F'(x) + 0 = f(x)$. Поэтому любая константа $C$ дает верную первообразную. Забыв $+ C$, мы теряем бесконечно много решений задачи.
+        </div>
+      </div>
+
+      <!-- Ловушка 6 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №6</span>
+            <span class="trap-category-tag">Векторная алгебра • Скалярное произведение</span>
+          </div>
+          </div>
+        <div class="trap-question">«Как быстро доказать, что два вектора перпендикулярны? Чему равно их скалярное произведение?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Начинают строить чертежи, искать длины или углы через косинусы, тратя 10 минут времени.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Векторы перпендикулярны тогда и только тогда, когда <b>$\vec{a} \cdot \vec{b} = 0$</b>!
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> По формуле: $\vec{a} \cdot \vec{b} = |\vec{a}| |\vec{b}| \cos 90^\circ = 0$ (так как $\cos 90^\circ = 0$). В координатах: $x_1 x_2 + y_1 y_2 + z_1 z_2 = 0$. Если эта сумма равна 0 — векторы ортогональны.
+        </div>
+      </div>
+
+      <!-- Ловушка 7 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №7</span>
+            <span class="trap-category-tag">Дифференциальное исчисление • Константы</span>
+          </div>
+          </div>
+        <div class="trap-question">«Чему равна производная от константы: $(5)'$, $(\pi)'$, $(e)'$? И чему равен дифференциал $d(10)$?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Говорят: $(\pi)' = 1$ или $(e)' = e^x$.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Строго <b>НУЛЮ</b>: $(C)' = 0$ и $d(C) = 0$!
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Числа $\pi \approx 3.14$, $e \approx 2.718$ и любые другие числа не зависят от переменной $x$. Производная показывает скорость изменения функции, а константа не меняется, её скорость изменения равна 0.
+        </div>
+      </div>
+
+      <!-- Ловушка 8 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №8</span>
+            <span class="trap-category-tag">Пределы • Неопределенность [0 / 0]</span>
+          </div>
+          </div>
+        <div class="trap-question">«Что означает неопределенность $[0 / 0]$? Чему равен такой предел: нулю или единице?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            «Ноль делить на ноль будет 1» или «предел не существует».
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Это <b>неопределенность</b>. Значением предела может быть абсолютно любое число!
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Неопределенность нужно раскрыть: разложить числитель и знаменатель на множители (по формулам сокращенного умножения или корням квадратного трехчлена) и сократить скобку $(x - x_0)$, которая обращалась в ноль.
+        </div>
+      </div>
+
+      <!-- Ловушка 9 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №9</span>
+            <span class="trap-category-tag">Пределы • Предел на бесконечности</span>
+          </div>
+          </div>
+        <div class="trap-question">«Чему равен $\lim_{x \to \infty} \frac{4x^5 - 2x + 1}{-x^5 + 3x^2}$ за 3 секунды без вычислений?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            Начинают делить каждый член на $x^5$, путаются в знаках минус и тратят драгоценное время.
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Предел равен <b>$-4$</b> (отношение старших коэффициентов: $\frac{4}{-1} = -4$).
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> При $x \to \infty$ младшие степени пренебрежимо малы. Главный закон пределов на бесконечности:<br>
+          • Если степени равны $\to$ предел равен отношению коэффициентов при старших степенях.<br>
+          • Если степень числителя больше $\to \infty$.<br>
+          • Если степень знаменателя больше $\to 0$.
+        </div>
+      </div>
+
+      <!-- Ловушка 10 -->
+      <div class="trap-card">
+        <div class="trap-top">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="trap-number-badge">Ловушка №10</span>
+            <span class="trap-category-tag">Матрицы • Умножение матриц</span>
+          </div>
+          </div>
+        <div class="trap-question">«Верно ли, что $A \cdot B = B \cdot A$? Всегда ли можно перемножить две произвольные матрицы?»</div>
+        <div class="trap-boxes-grid">
+          <div class="trap-wrong-box">
+            <div class="trap-box-label">❌ Как ошибаются студенты:</div>
+            «Да, ведь от перемены мест сомножителей произведение не меняется» (применяют школьное правило чисел к матрицам).
+          </div>
+          <div class="trap-right-box">
+            <div class="trap-box-label">✅ Идеальный ответ для комиссии:</div>
+            Категорически <b>НЕТ!</b> Умножение матриц в общем случае <b>НЕкоммутативно</b> ($A \cdot B \ne B \cdot A$).
+          </div>
+        </div>
+        <div class="trap-explain-box">
+          <strong>Железобетонная аргументация:</strong> Произведение $A \cdot B$ определено только тогда, когда <b>число столбцов матрицы $A$ строго равно числу строк матрицы $B$</b> (правило «строка на столбец»). При перемене мест произведение $B \cdot A$ часто вообще не существует или имеет другие размеры!
+        </div>
+      </div>
+    </div>
+  
+    </div>
+
+
     <!-- Выдвижная шторка пошагового решения и произношения для комиссии -->
     <div class="solution-drawer" id="solutionDrawer">
       <div class="drawer-header">
@@ -483,6 +1104,7 @@
   </div>
 
   <script defer src="tickets-data.js"></script>
+  <script defer src="trainer.js"></script>
   <script defer src="calc.js"></script>
 </body>
 </html>

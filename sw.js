@@ -1,9 +1,11 @@
 // Service Worker для 100% офлайн работы калькулятора в аудитории
-const CACHE_NAME = 'exam-calc-v6';
+const CACHE_NAME = 'exam-calc-v7';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
+  './trainer.css',
+  './trainer.js',
   './tickets-data.js',
   './calc.js',
   './manifest.json',
