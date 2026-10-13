@@ -657,7 +657,7 @@ window.solveCramer3x3 = function() {
 window.solvePolynomialDeriv = function() {
   const str = document.getElementById('derivFunc').value.trim();
 
-  // Для экзаменационной функции 3x^5 - 2x^4 + 4x - 1
+  // Для экзаменационной функции 3x^5 - 2x^4 + 4x - 3
   let d1 = "15x^4 - 8x^3 + 4";
   let d2 = "60x^3 - 24x^2";
 
@@ -670,7 +670,7 @@ window.solvePolynomialDeriv = function() {
     resultText: `🎯 $f'(x) = ${d1}, \\quad f''(x) = ${d2}$`,
     steps: [
       `💡 <b>1. Правило степени:</b> $(x^n)' = n x^{n-1}$, $(cx)' = c$, $(C)' = 0$`,
-      `📝 <b>2. Первая производная $f'(x)$:</b><br>• $(3x^5)' = 3 \\cdot 5x^4 = 15x^4$<br>• $(-2x^4)' = -2 \\cdot 4x^3 = -8x^3$<br>• $(4x)' = 4$<br>• $(-1)' = 0$<br>$$f'(x) = ${d1}$$`,
+      `📝 <b>2. Первая производная $f'(x)$:</b><br>• $(3x^5)' = 3 \\cdot 5x^4 = 15x^4$<br>• $(-2x^4)' = -2 \\cdot 4x^3 = -8x^3$<br>• $(4x)' = 4$<br>• $(-3)' = 0$<br>$$f'(x) = ${d1}$$`,
       `📝 <b>3. Вторая производная $f''(x) = (f'(x))'$:</b><br>• $(15x^4)' = 60x^3$<br>• $(-8x^3)' = -24x^2$<br>• $(4)' = 0$<br>$$f''(x) = ${d2}$$`
     ],
     formulaPronounce: `производная степени равна: показатель умножить на икс в степени на единицу меньше`,
@@ -1086,7 +1086,7 @@ window.jumpToTicket = function(val) {
       setVal('cr3_a3', -1); setVal('cr3_b3', 6); setVal('cr3_c3', 1); setVal('cr3_d3', 5);
     },
     math_9: () => {
-      setVal('derivFunc', '3x^5 - 2x^4 + 4x - 1');
+      setVal('derivFunc', '3x^5 - 2x^4 + 4x - 3');
     },
     math_12: () => {
       setVal('compA', 2); setVal('compB', 6); setVal('compN', 10);
