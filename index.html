@@ -124,14 +124,13 @@
     <!-- Верхняя панель режимов (встроена открыто) -->
     <div class="mode-bar">
       <button class="mode-pill active" data-mode="standard">🔢 Стандарт</button>
-      <button class="mode-pill" data-mode="trainer" style="border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700;">📚 Тренажёр (47 билетов)</button>
-      
       <button class="mode-pill" data-mode="prob">🎲 Тервер (Т1-6, П1-10)</button>
       <button class="mode-pill" data-mode="matrices">🔲 Матрицы & Крамер (№1–8)</button>
       <button class="mode-pill" data-mode="derivatives">📈 Производные (№9–15)</button>
       <button class="mode-pill" data-mode="integrals">📐 Интегралы & Площади (№16–22)</button>
       <button class="mode-pill" data-mode="limits">♾️ Пределы (№23–27)</button>
       <button class="mode-pill" data-mode="vectors">↗️ Векторы & Прямая (№28–31)</button>
+      <button class="mode-pill" data-mode="trainer" style="border: 1px solid #38bdf8; color: #38bdf8; font-weight: 700;">📚 Тренажёр (47 билетов)</button>
     </div>
 
     <!-- Основной дисплей калькулятора -->
@@ -465,27 +464,11 @@
         <h2 style="font-size: 19px; font-weight: 800; color: #38bdf8; margin-bottom: 4px;">📚 База всех 47 билетов & Тренажёр</h2>
         <p style="font-size: 12.5px; color: #94a3b8; margin: 0;">Пошаговые решения, чистовики, шпаргалка формул и ловушки комиссии</p>
       </div>
-      <div class="progress-card">
-        <div class="progress-header">
-          <span class="progress-title">📊 Общий прогресс выученных билетов</span>
-          <span class="progress-score" id="progressScore">0% готово</span>
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progressFill"></div>
-        </div>
-        <div class="progress-stats">
-          <div class="stat-item">Всего выучено: <strong id="statCount">0 из 47</strong></div>
-          <div class="stat-item">Теория вероятностей: <strong id="statProb">0/16</strong></div>
-          <div class="stat-item">Высшая математика: <strong id="statMath">0/31</strong></div>
-        </div>
-      </div>
-
       <!-- Навигация по разделам -->
       <nav class="nav-tabs">
-        <button class="tab-btn active" data-tab="all">Все задания <span class="tab-count">0/47</span></button>
-        <button class="tab-btn tab-unlearned" data-tab="unlearned">⚡ Осталось выучить <span class="tab-count" id="tabUnlearnedCount">47</span></button>
-        <button class="tab-btn" data-tab="prob">Теория вероятностей <span class="tab-count">0/16</span></button>
-        <button class="tab-btn" data-tab="math">Вышмат (Все) <span class="tab-count">0/31</span></button>
+        <button class="tab-btn active" data-tab="all">Все задания (47)</button>
+        <button class="tab-btn" data-tab="prob">Теория вероятностей (16)</button>
+        <button class="tab-btn" data-tab="math">Вышмат (31)</button>
         <button class="tab-btn" data-tab="math_matrices">Матрицы & Крамер (1–8)</button>
         <button class="tab-btn" data-tab="math_derivatives">Производные (9–15)</button>
         <button class="tab-btn" data-tab="math_integrals">Интегралы & Площади (16–22)</button>
@@ -495,17 +478,10 @@
         <button class="tab-btn tab-traps" data-tab="traps">🔥 Ловушки комиссии (Топ-10)</button>
       </nav>
 
-      <!-- Панель управления -->
-      <div class="controls-bar" id="controlsBar">
-      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <input type="text" class="search-input" id="searchInput" placeholder="Быстрый поиск по номеру или условию...">
-        <button class="active-recall-toggle-btn" id="btnRecallToggle" onclick="toggleActiveRecallMode()" title="В режиме экзамена скрываются формулы и ответы для самопроверки">
-          <span class="recall-icon">🧠</span>
-          <span class="recall-text">Режим экзамена (скрыть формулы)</span>
-        </button>
+      <!-- Панель чистого поиска -->
+      <div class="controls-bar" id="controlsBar" style="margin: 16px 0;">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Быстрый поиск по номеру билета или условию задачи...">
       </div>
-      <button class="toggle-all-btn" onclick="toggleAllSolutions()">Показать / скрыть все решения</button>
-    </div>
 
     <!-- Контейнер для карточек с задачами -->
     <div class="cards-list" id="cardsContainer"></div>
