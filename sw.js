@@ -1,5 +1,5 @@
 // Service Worker для 100% офлайн работы калькулятора в аудитории
-const CACHE_NAME = 'exam-calc-v8';
+const CACHE_NAME = 'exam-calc-v9';
 const ASSETS = [
   './',
   './index.html',
